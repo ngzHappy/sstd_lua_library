@@ -20,7 +20,6 @@ public:
     typedef void(*PushValueFunction)(lua_State *);
     using KeyValueArray = std::list< std::pair< PushValueFunction, PushValueFunction> >;
 
-
 private:
     lua_State * thisL;
     std::string_view thisTableName;
@@ -30,10 +29,12 @@ public:
     inline operator lua_State *() const;
     inline operator FunctionMap *() const;
 public:
+    static const char * thisIndex();
+public:
     LuaRegisterTable(lua_State *L,
         std::string_view argTableName/*used for debug*/,
         FunctionMap *,
-        KeyValueArray * /**/=nullptr);
+        KeyValueArray * /**/ = nullptr);
 public:
     void createTable();
 private:

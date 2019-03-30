@@ -44,7 +44,7 @@ inline void _createTable(LuaRegisterTable * arg) {
     auto & thisFunctionMap = arg->thisFunctionMap;
     auto & thisTableName = arg->thisTableName;
 
-    ::lua_checkstack(L, 1024);
+    ::lua_checkstack(L, 64);
 
     ::lua_createtable(L, 0,
         thisKeyValueArray ?
@@ -91,6 +91,10 @@ void LuaRegisterTable::createTable() {
     ::lua_pushlightuserdata(thisL, this);
     ::lua_pcall(thisL, 1, 1, 0);
     return;
+}
+
+const char * LuaRegisterTable::thisIndex() {
+    return "thisIndex"; 
 }
 
 /*
