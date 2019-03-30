@@ -1,0 +1,7 @@
+.vs/
+debug/
+release/
+*.sln
+*.vcxproj*
+*.stash
+*.user
