@@ -112,7 +112,8 @@ os.exit()
 sstd.filesystem.testHellowWorld()
 sstd.filesystem.setCurrentPath("C:/")
 print( sstd.filesystem.getCurrentPath() )
-
+path = sstd.filesystem.createPath("C:/")
+print(path:toString())
 */
 
 

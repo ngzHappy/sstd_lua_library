@@ -55,12 +55,10 @@ namespace _theSSTDLuaFilesystemFile {
 
     inline static int setCurrentPath(lp L) {
         try {
-            constexpr auto varStringIndex = 1;
             std::size_t varLength{ 1 };
-            auto varAns = ::lua_tolstring(L,
-                varStringIndex, &varLength);
+            auto varAns = ::lua_tolstring(L, -1, &varLength);
             if (!varAns) {
-                pushString(L, "arg_1 is not string"sv);
+                pushString(L, "arg-1 is not string"sv);
                 ::lua_error(L);
             }
             sstd::filesystem::current_path(fromUtf8({ varAns,varLength }));
@@ -70,6 +68,85 @@ namespace _theSSTDLuaFilesystemFile {
         }
         return 0;
     }
+
+    class Path {
+    public:
+        sstd::filesystem::path thisData;
+    public:
+
+        inline static int createPath(lp L) {
+
+            std::size_t varLength{ 1 };
+            const char * varAns =
+                ::lua_tolstring(L, -1, &varLength);
+
+            if (varAns == nullptr) {
+                pushString(L, "arg-1 is not string"sv);
+                ::lua_error(L);
+            }
+
+            LuaRegisterTable varRegister{ L,
+                 sstd_new<Path>(fromUtf8({varAns,varLength})),
+                  [](void * arg) { delete reinterpret_cast<Path *>(arg); },
+                   "path"sv,
+                   getTable(),
+                   getArray()
+            };
+            varRegister.createTable();
+
+            return 1;
+
+        }
+
+        inline static int toString(lp L);
+
+        inline static LuaRegisterTable::FunctionMap * getTable();
+        inline static LuaRegisterTable::KeyValueArray  * getArray();
+
+    private:
+        sstd_class(Path);
+    };
+
+    inline int Path::toString(lp L) {
+
+        if (false == lua_istable(L, -1)) {
+            pushString(L, "arg-1 is not table"sv);
+            ::lua_error(L);
+        }
+
+        auto varPath = 
+            reinterpret_cast<Path*>(::lua_gettable_userdata(L,-1));
+
+        assert(varPath);
+        
+        auto varString = toUtf8( varPath->thisData ) ;
+        pushString(L,varString);
+        return 1;
+
+    }
+
+    inline LuaRegisterTable::FunctionMap * Path::getTable() {
+        static LuaRegisterTable::FunctionMap varAns = []() {
+            LuaRegisterTable::FunctionMap varAns;
+
+            using namespace _theSSTDLuaFilesystemFile;
+
+            varAns["testHellowWorld"sv] = [](lua_State *L) ->int {
+                luaL_dostring(L, u8R"(print("Hellow World!"))");
+                return 0;
+            };
+
+            varAns["toString"sv] = &toString;
+
+            return std::move(varAns);
+        }();
+        return &varAns;
+    }
+
+    inline LuaRegisterTable::KeyValueArray * Path::getArray() {
+        return nullptr;
+    }
+
 
 }/**/
 
@@ -88,6 +165,7 @@ inline static LuaRegisterTable::FunctionMap * getTable() {
 
         varAns["getCurrentPath"sv] = &getCurrentPath;
         varAns["setCurrentPath"sv] = &setCurrentPath;
+        varAns["createPath"sv] = &Path::createPath;
 
         return std::move(varAns);
     }();
