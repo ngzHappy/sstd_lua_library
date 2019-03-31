@@ -1,65 +1,90 @@
 ﻿
 #include "sstd_lua_filesystem.hpp"
+#include "sstd_lua_register_table/sstd_lua_register_table.hpp"
+
 #include <unordered_map>
 
-class FunctionItem {
-public:
-    lua_CFunction function;
-};
 
-inline static lua_CFunction getFunction(std::string_view key) {
+namespace _theSSTDLuaFilesystemFile {
 
-    using Map = std::unordered_map< std::string_view,
-        FunctionItem,
-        std::hash<std::string_view>,
-        std::equal_to<>,
-        sstd::allocator< std::pair<const std::string_view, FunctionItem>>>;
+    using lp = lua_State * ;
 
-    const static Map varAns = []()-> Map {
-        Map varAns;
-
-        varAns.emplace("testHellowWorld"sv,
-            FunctionItem{ [](lua_State * L)->int {
-         ::luaL_loadstring(L,u8R"( print( "Hellow World!" ) )");
-         ::lua_pcall(L,0,0,0);
-        return 0; } });
-
-        return std::move(varAns); }();
-
-        auto varPos = varAns.find(key);
-        if (varPos != varAns.end()) {
-            return varPos->second.function;
+    inline static void replace(std::string & arg) {
+        for (auto & varI : arg) {
+            if (varI == '\\') {
+                varI = '/';
+            }
         }
-        return nullptr;
-}
-
-inline static int __index(lua_State * L){
-    std::size_t varLength{ 1 };
-    const char * varAns = ::lua_tolstring(L, 2, &varLength);
-    auto varFunction = getFunction({ varAns,varLength });
-    if (varFunction) {
-        ::lua_pushcclosure(L, varFunction, 0);
-    } else {
-        ::lua_pushnil(L);
     }
-    return 1;
+
+    inline static void pushString(lp L, std::string_view arg) {
+        ::lua_pushlstring(L, arg.data(), arg.size());
+    }
+
+    inline static int getCurrentPath(lp L) {
+        auto varPath = sstd::filesystem::current_path().u8string();
+#if defined( _WIN32 )
+        replace(varPath);
+#endif
+        ::lua_pushlstring(L, varPath.data(), varPath.size());
+        return 1;
+    }
+
+    inline static int setCurrentPath(lp L) {
+        try {
+            constexpr auto varStringIndex = 1;
+            std::size_t varLength{ 1 };
+            auto varAns = ::lua_tolstring(L,
+                varStringIndex, &varLength);
+            if (!varAns) {
+                pushString(L, "arg_1 is not string"sv);
+                ::lua_error(L);
+            }
+            sstd::filesystem::current_path(sstd::filesystem::u8path(
+                varAns, varAns + varLength));
+        } catch (std::exception & e) {
+            pushString(L, e.what());
+            ::lua_error(L);
+        }
+        return 0;
+    }
+
+}/**/
+
+
+inline static LuaRegisterTable::FunctionMap * getTable() {
+
+    static LuaRegisterTable::FunctionMap varAns = []() {
+        LuaRegisterTable::FunctionMap varAns;
+
+        using lp = _theSSTDLuaFilesystemFile::lp;
+        using namespace _theSSTDLuaFilesystemFile;
+
+        varAns["testHellowWorld"sv] = [](lua_State *L) ->int {
+            luaL_dostring(L, u8R"(print("Hellow World!"))");
+            return 0;
+        };
+
+        varAns["getCurrentPath"sv] = &getCurrentPath;
+        varAns["setCurrentPath"sv] = &setCurrentPath;
+
+        return std::move(varAns);
+    }();
+    return &varAns;
 }
 
-extern void pushFilesystemTable(lua_State * L){
+inline static LuaRegisterTable::KeyValueArray  * getArray() {
+    return nullptr;
+}
 
-    ::lua_createtable(L, 0, 8);
-    auto varTableIndex = ::lua_gettop(L);
+extern void sstd::pushFilesystemTable(lua_State * L) {
 
-    ::lua_pushvalue(L, varTableIndex);
-    ::lua_setmetatable(L, varTableIndex);
-
-    ::lua_pushlstring(L, "__index", 7);
-    ::lua_pushcclosure(L, &__index, 0);
-    ::lua_settable(L, varTableIndex);
-
-    ::lua_pushlstring(L, "__name", 6);
-    ::lua_pushlstring(L, "filesystem", 17);
-    ::lua_settable(L, varTableIndex);
+    LuaRegisterTable varRegister{ L,
+           "filesystem"sv,
+           getTable(),
+           getArray()
+    };
+    varRegister.createTable();
 
     return;
 
