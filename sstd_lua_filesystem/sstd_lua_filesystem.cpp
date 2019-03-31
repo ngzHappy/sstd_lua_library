@@ -114,13 +114,13 @@ namespace _theSSTDLuaFilesystemFile {
             ::lua_error(L);
         }
 
-        auto varPath = 
-            reinterpret_cast<Path*>(::lua_gettable_userdata(L,-1));
+        auto varPath =
+            reinterpret_cast<Path*>(::lua_gettable_userdata(L, -1));
 
         assert(varPath);
-        
-        auto varString = toUtf8( varPath->thisData ) ;
-        pushString(L,varString);
+
+        auto varString = toUtf8(varPath->thisData);
+        pushString(L, varString);
         return 1;
 
     }
