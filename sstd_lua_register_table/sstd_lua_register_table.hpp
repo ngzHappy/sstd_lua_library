@@ -39,7 +39,7 @@ public:
         std::string_view argTableName/*used for debug*/,
         FunctionMap *,
         KeyValueArray * /**/ = nullptr);
-    LuaRegisterTable(lua_State *L,
+    inline LuaRegisterTable(lua_State *L,
         std::string_view argTableName/*used for debug*/,
         FunctionMap * argMap,
         KeyValueArray * argArray = nullptr) :LuaRegisterTable(L,
