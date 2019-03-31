@@ -142,9 +142,7 @@ namespace _theSSTDLuaFilesystemFile {
         return nullptr;
     }
 
-
 }/**/
-
 
 inline static LuaRegisterTable::FunctionMap * getTable() {
 
