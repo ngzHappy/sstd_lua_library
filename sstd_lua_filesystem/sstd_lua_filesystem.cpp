@@ -4,6 +4,10 @@
 
 #include <unordered_map>
 
+#if defined(_WIN32)
+#define WINDOWS_LICK_
+#else
+#endif
 
 namespace _theSSTDLuaFilesystemFile {
 
@@ -21,11 +25,30 @@ namespace _theSSTDLuaFilesystemFile {
         ::lua_pushlstring(L, arg.data(), arg.size());
     }
 
-    inline static int getCurrentPath(lp L) {
-        auto varPath = sstd::filesystem::current_path().u8string();
-#if defined( _WIN32 )
-        replace(varPath);
+    inline static std::string toUtf8(const sstd::filesystem::path & arg) {
+#if defined( WINDOWS_LICK_ )
+        auto varAns = arg.u8string();
+        replace(varAns);
+        return std::move(varAns);
+#else
+        return arg.string();
 #endif
+    }
+
+    inline static sstd::filesystem::path fromUtf8(std::string_view arg) {
+#if defined( WINDOWS_LICK_ )
+#if __has_include(<filesystem>)
+        return sstd::filesystem::u8path(arg);
+#else
+        return sstd::filesystem::path(arg)/*TODO:this is logical error!!!*/;
+#endif
+#else
+        return sstd::filesystem::path(arg);
+#endif
+    }
+
+    inline static int getCurrentPath(lp L) {
+        auto varPath = toUtf8(sstd::filesystem::current_path());
         ::lua_pushlstring(L, varPath.data(), varPath.size());
         return 1;
     }
@@ -40,8 +63,7 @@ namespace _theSSTDLuaFilesystemFile {
                 pushString(L, "arg_1 is not string"sv);
                 ::lua_error(L);
             }
-            sstd::filesystem::current_path(sstd::filesystem::u8path(
-                varAns, varAns + varLength));
+            sstd::filesystem::current_path(fromUtf8({ varAns,varLength }));
         } catch (std::exception & e) {
             pushString(L, e.what());
             ::lua_error(L);
@@ -57,7 +79,6 @@ inline static LuaRegisterTable::FunctionMap * getTable() {
     static LuaRegisterTable::FunctionMap varAns = []() {
         LuaRegisterTable::FunctionMap varAns;
 
-        using lp = _theSSTDLuaFilesystemFile::lp;
         using namespace _theSSTDLuaFilesystemFile;
 
         varAns["testHellowWorld"sv] = [](lua_State *L) ->int {
@@ -89,4 +110,6 @@ extern void sstd::pushFilesystemTable(lua_State * L) {
     return;
 
 }
+
+
 
