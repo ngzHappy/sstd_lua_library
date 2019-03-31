@@ -4,12 +4,7 @@
 
 inline static LuaRegisterTable::FunctionMap * getTable() {
     static LuaRegisterTable::FunctionMap varAns = []() {
-        LuaRegisterTable::FunctionMap varAns;
-
-        varAns["testHellowWorld"sv] = [](lua_State *L) ->int {
-            luaL_dostring(L, u8R"(print("Hellow World!"))");
-            return 0;
-        };
+        auto varAns = LuaRegisterTable::globalFunctionMap();
 
         return std::move(varAns);
     }();

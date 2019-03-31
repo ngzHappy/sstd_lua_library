@@ -49,6 +49,8 @@ public:
             argMap,
             argArray){}
 public:
+    static FunctionMap globalFunctionMap();
+public:
     void createTable();
 private:
     friend void _createTable(LuaRegisterTable * arg);

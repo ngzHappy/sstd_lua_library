@@ -105,6 +105,20 @@ const char * LuaRegisterTable::thisIndex() {
     return "thisIndex";
 }
 
+LuaRegisterTable::FunctionMap LuaRegisterTable::globalFunctionMap() {
+    const static FunctionMap varAns = []() {
+        FunctionMap varAns;
+
+        varAns["testHellowWorld"sv] = [](lua_State *L) ->int {
+            luaL_dostring(L, u8R"(print("Hellow World!"))");
+            return 0;
+        };
+
+        return std::move(varAns);
+    }();
+    return varAns;
+}
+
 /*
 sstd = require("sstd_lua_library_debug")
 sstd.testHellowWorld()

@@ -127,14 +127,9 @@ namespace _theSSTDLuaFilesystemFile {
 
     inline LuaRegisterTable::FunctionMap * Path::getTable() {
         static LuaRegisterTable::FunctionMap varAns = []() {
-            LuaRegisterTable::FunctionMap varAns;
+            auto varAns = LuaRegisterTable::globalFunctionMap();
 
             using namespace _theSSTDLuaFilesystemFile;
-
-            varAns["testHellowWorld"sv] = [](lua_State *L) ->int {
-                luaL_dostring(L, u8R"(print("Hellow World!"))");
-                return 0;
-            };
 
             varAns["toString"sv] = &toString;
 
@@ -154,14 +149,9 @@ namespace _theSSTDLuaFilesystemFile {
 inline static LuaRegisterTable::FunctionMap * getTable() {
 
     static LuaRegisterTable::FunctionMap varAns = []() {
-        LuaRegisterTable::FunctionMap varAns;
+        auto varAns = LuaRegisterTable::globalFunctionMap();
 
         using namespace _theSSTDLuaFilesystemFile;
-
-        varAns["testHellowWorld"sv] = [](lua_State *L) ->int {
-            luaL_dostring(L, u8R"(print("Hellow World!"))");
-            return 0;
-        };
 
         varAns["getCurrentPath"sv] = &getCurrentPath;
         varAns["setCurrentPath"sv] = &setCurrentPath;
