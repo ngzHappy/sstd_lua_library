@@ -1,12 +1,16 @@
 ﻿#include "sstd_lua_register_table.hpp"
 
 LuaRegisterTable::LuaRegisterTable(lua_State *L,
+    void * argUserData,
+    void(*argUserFunction)(void*),
     std::string_view argTableName,
     FunctionMap * argMap,
     KeyValueArray * argArray) : thisL(L),
     thisTableName(argTableName),
     thisFunctionMap(argMap),
     thisKeyValueArray(argArray) {
+    thisUserData = argUserData;
+    thisUserDataFunction = argUserFunction;
 }
 
 inline static lua_CFunction _this_get_function(lua_State * L,
@@ -51,6 +55,10 @@ inline void _createTable(LuaRegisterTable * arg) {
         static_cast<int>(thisKeyValueArray->size() + 4) : 4);
     auto varTableIndex = ::lua_gettop(L);
 
+    ::lua_settable_userdata(L, varTableIndex,
+        arg->thisUserData,
+        arg->thisUserDataFunction);
+
     ::lua_pushvalue(L, varTableIndex);
     ::lua_setmetatable(L, varTableIndex);
 
@@ -94,7 +102,7 @@ void LuaRegisterTable::createTable() {
 }
 
 const char * LuaRegisterTable::thisIndex() {
-    return "thisIndex"; 
+    return "thisIndex";
 }
 
 /*
