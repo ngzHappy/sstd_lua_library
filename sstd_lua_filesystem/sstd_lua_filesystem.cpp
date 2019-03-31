@@ -53,21 +53,7 @@ namespace _theSSTDLuaFilesystemFile {
         return 1;
     }
 
-    inline static int setCurrentPath(lp L) {
-        try {
-            std::size_t varLength{ 1 };
-            auto varAns = ::lua_tolstring(L, -1, &varLength);
-            if (!varAns) {
-                pushString(L, "arg-1 is not string"sv);
-                ::lua_error(L);
-            }
-            sstd::filesystem::current_path(fromUtf8({ varAns,varLength }));
-        } catch (std::exception & e) {
-            pushString(L, e.what());
-            ::lua_error(L);
-        }
-        return 0;
-    }
+    inline static int setCurrentPath(lp L);
 
     class Path {
     public:
@@ -106,6 +92,29 @@ namespace _theSSTDLuaFilesystemFile {
     private:
         sstd_class(Path);
     };
+
+    inline static int setCurrentPath(lp L) {
+        sstd_try{
+            if (lua_istable(L,-1)) {
+                Path * varPath =
+                    sstd::luaCheckTableUserData<Path>(L,-1,"path"sv);
+                sstd::filesystem::current_path(varPath->thisData);
+            } else {
+                std::size_t varLength{ 1 };
+                auto varAns = ::lua_tolstring(L, -1, &varLength);
+                if (!varAns) {
+                    pushString(L, "arg-1 is not string or path"sv);
+                    ::lua_error(L);
+                }
+                sstd::filesystem::current_path(fromUtf8({ varAns,varLength }));
+            }
+        } sstd_catch(std::exception & e) {
+            pushString(L, e.what());
+            ::lua_error(L);
+        }
+        return 0;
+    }
+
 
     inline int Path::toString(lp L) {
 
