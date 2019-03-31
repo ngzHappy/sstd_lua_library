@@ -57,7 +57,9 @@ inline void _createTable(LuaRegisterTable * arg) {
 
     ::lua_settable_userdata(L, varTableIndex,
         arg->thisUserData,
-        arg->thisUserDataFunction);
+        arg->thisUserDataFunction,
+        thisTableName.data(),
+        thisTableName.size());
 
     ::lua_pushvalue(L, varTableIndex);
     ::lua_setmetatable(L, varTableIndex);
