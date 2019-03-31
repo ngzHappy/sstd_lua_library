@@ -109,6 +109,10 @@ const char * LuaRegisterTable::thisIndex() {
 sstd = require("sstd_lua_library_debug")
 sstd.testHellowWorld()
 os.exit()
+sstd.filesystem.testHellowWorld()
+sstd.filesystem.setCurrentPath("C:/")
+print( sstd.filesystem.getCurrentPath() )
+
 */
 
 
