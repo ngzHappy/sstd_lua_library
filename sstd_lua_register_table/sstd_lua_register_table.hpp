@@ -23,13 +23,13 @@ public:
 private:
     lua_State * thisL;
     std::string_view thisTableName;
-    FunctionMap * thisFunctionMap;
-    KeyValueArray * thisKeyValueArray;
+    const FunctionMap * thisFunctionMap;
+    const KeyValueArray * thisKeyValueArray;
     void * thisUserData;
     void(*thisUserDataFunction)(void *);
 public:
     inline operator lua_State *() const;
-    inline operator FunctionMap *() const;
+    inline operator const FunctionMap *() const;
 public:
     static const char * thisIndex();
 public:
@@ -37,12 +37,12 @@ public:
         void *,
         void(*)(void*),
         std::string_view argTableName/*used for debug*/,
-        FunctionMap *,
-        KeyValueArray * /**/ = nullptr);
+        const FunctionMap *,
+        const KeyValueArray * /**/ = nullptr);
     inline LuaRegisterTable(lua_State *L,
         std::string_view argTableName/*used for debug*/,
-        FunctionMap * argMap,
-        KeyValueArray * argArray = nullptr) :LuaRegisterTable(L,
+        const FunctionMap * argMap,
+        const KeyValueArray * argArray = nullptr) :LuaRegisterTable(L,
             nullptr,
             nullptr,
             argTableName,
@@ -63,7 +63,7 @@ inline LuaRegisterTable::operator lua_State *() const {
     return thisL;
 }
 
-inline LuaRegisterTable::operator FunctionMap *() const {
+inline LuaRegisterTable::operator const FunctionMap *() const {
     return thisFunctionMap;
 }
 

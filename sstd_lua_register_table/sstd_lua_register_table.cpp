@@ -4,8 +4,8 @@ LuaRegisterTable::LuaRegisterTable(lua_State *L,
     void * argUserData,
     void(*argUserFunction)(void*),
     std::string_view argTableName,
-    FunctionMap * argMap,
-    KeyValueArray * argArray) : thisL(L),
+    const FunctionMap * argMap,
+    const KeyValueArray * argArray) : thisL(L),
     thisTableName(argTableName),
     thisFunctionMap(argMap),
     thisKeyValueArray(argArray) {
@@ -65,7 +65,8 @@ inline void _createTable(LuaRegisterTable * arg) {
     ::lua_setmetatable(L, varTableIndex);
 
     ::lua_pushlstring(L, "__index", 7);
-    ::lua_pushlightuserdata(L, thisFunctionMap);
+    ::lua_pushlightuserdata(L,
+        const_cast<LuaRegisterTable::FunctionMap *>(thisFunctionMap));
     ::lua_pushcclosure(L, &_this_index, 1);
     ::lua_settable(L, varTableIndex);
 
